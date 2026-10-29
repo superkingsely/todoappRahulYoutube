@@ -6,7 +6,11 @@ public class TodoAppDbContext : DbContext
 {
     public TodoAppDbContext(DbContextOptions<TodoAppDbContext> options) : base(options) { }
 
-
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder); 
+        
+    }
     public DbSet<User> Users { get; set; }
     public DbSet<TodoList> TodoLists { get; set; }
     public DbSet<TodoItem> TodoItems { get; set; }
