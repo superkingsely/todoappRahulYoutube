@@ -9,6 +9,8 @@ public class TodoAppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TodoAppDbContext).Assembly);
 
         modelBuilder.Entity<TodoList>()
             .HasOne(tl => tl.User)
