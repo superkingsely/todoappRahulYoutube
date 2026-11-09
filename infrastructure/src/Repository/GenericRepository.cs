@@ -1,7 +1,11 @@
 
 
 // receive entitiy from infrastuctuer and give out domain at application
- public class GenericRepository<TDomain, TEntity> : IGenericRepository<TDomain>
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+
+public class GenericRepository<TDomain, TEntity> : IGenericRepository<TDomain>
         where TDomain : class
         where TEntity : class
     {

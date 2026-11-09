@@ -1,6 +1,8 @@
 
 
- public class UserMappingExtension : Profile
+using AutoMapper;
+
+public class UserMappingExtension : Profile
     {
 
         public UserMappingExtension()
