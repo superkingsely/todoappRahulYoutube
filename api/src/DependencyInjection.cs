@@ -8,7 +8,7 @@ public static class DependencyInjection
            this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString
-            = configuration.GetConnectionString("DatabaseConnection");
+            = configuration.GetConnectionString("DefaultConnection");
 
         services.AddDbContext<TodoAppDbContext>(options =>
         {
@@ -28,6 +28,8 @@ public static class DependencyInjection
     {
         
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         return services;
     }
