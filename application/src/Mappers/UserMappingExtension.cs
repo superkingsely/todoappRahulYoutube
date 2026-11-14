@@ -10,7 +10,8 @@
                 {
                     Email = user.Email,
                     FullName = user.FullName,
-                    PasswordHash = user.Password
+                    PasswordHash = user.Password,
+                    Password = user.Password
                 };
             }
         }
