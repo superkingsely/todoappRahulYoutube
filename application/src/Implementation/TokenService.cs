@@ -1,5 +1,14 @@
 
+
+
+
+
+
+using System.Security.Claims;
+using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Todo.Application.Common;
 
 public class TokenService(
@@ -9,39 +18,41 @@ public class TokenService(
         //   IConfiguration configuration
         ) : ITokenService
 {
-     public async Task<Result<TokenResponseDto>> GetTokenAsync(TokenRequestDto requestDto)
+     public async Task<Result<TokenResponseDtoOne>> GetTokenAsync(TokenRequestDto requestDto)
         {
             var userDomain =
                 await userRepository.GetByEmailAsync(requestDto.userName);
 
             if (userDomain == null)
-                return Result.Failure<TokenResponseDto>(
+                return Result.Failure<TokenResponseDtoOne>(
                     Error.Unauthorized("Auth.InvalidEmail", ErrorConstants.InvalidEmail));
 
             if (!passwordHasher.VerifyPassword(requestDto.password, userDomain.PasswordHash))
-                return Result.Failure<TokenResponseDto>(
+                return Result.Failure<TokenResponseDtoOne>(
                     Error.Unauthorized("Auth.InvalidPassword", ErrorConstants.InvalidPassword));
-            
+
             // Generate refresh token
-            var refreshToken = 
-                await GenerateAndStoreRefreshTokenAsync(userDomain.Id, clientIp: null);
+            // var refreshToken = 
+            //     await GenerateAndStoreRefreshTokenAsync(userDomain.Id, clientIp: null);
 
             // Generate access token
-            string accessToken = GenerateAccessToken(userDomain, refreshToken.refreshTokenId);
-            int accessTokenExpiryMinutes = GetAccessTokenExpiryMinutes();
+            string accessToken = GenerateAccessToken(userDomain);
+            // string accessToken = GenerateAccessToken(userDomain, refreshToken.refreshTokenId);
+            // int accessTokenExpiryMinutes = GetAccessTokenExpiryMinutes();
 
-            return Result.Success(new TokenResponseDto(accessToken, refreshToken.refreshToken));
+            return Result.Success(new TokenResponseDtoOne(accessToken));
+            // return Result.Success(new TokenResponseDto(accessToken, refreshToken.refreshToken));
         }
 
 
-         private string GenerateAccessToken(UserDomain userResponse, Guid sessionId)
+         private string GenerateAccessToken(UserDomain userResponse)
         {
             string secretKey = configuration["Jwt:Secret"]!;
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            int expiryMinutes = GetAccessTokenExpiryMinutes();
+            // int expiryMinutes = GetAccessTokenExpiryMinutes();
 
             var tokenDescriptor
                 = new SecurityTokenDescriptor
@@ -49,10 +60,10 @@ public class TokenService(
                     Subject = new ClaimsIdentity([
                         new Claim(ClaimTypes.Name, userResponse.FullName),
                         new Claim(ClaimTypes.Email, userResponse.Email),
-                        new Claim("UserId", userResponse.Id.ToString()),
-                        new Claim("sid",sessionId.ToString())
+                        new Claim("UserId", userResponse.Id.ToString())
+                        // new Claim("sid",sessionId.ToString())
                     ]),
-                    Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
+                    Expires = DateTime.UtcNow.AddMinutes(60),
                     SigningCredentials = credentials,
                     Issuer = configuration["Jwt:Issuer"],
                     Audience = configuration["Jwt:Audience"]

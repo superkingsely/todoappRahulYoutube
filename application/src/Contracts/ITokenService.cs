@@ -5,7 +5,7 @@ using Todo.Application.Common;
 public interface ITokenService
 {
     
-    Task<Result<TokenResponseDto>> GetTokenAsync(TokenRequestDto requestDto);
+    Task<Result<TokenResponseDtoOne>> GetTokenAsync(TokenRequestDto requestDto);
 
     // Task<Result<TokenResponseDto>> RefreshTokenAsync(
     //     RefreshTokenRequestDto requestDto, string? clientIp = null);
