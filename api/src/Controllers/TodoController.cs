@@ -9,18 +9,21 @@ using Microsoft.AspNetCore.Mvc;
 public class TodoController : ControllerBase
 {
     private readonly ILogger<TodoController> logger;
+    private readonly ITodoService _todoService;
 
-    public TodoController(ILogger<TodoController> logger)
+    public TodoController(ILogger<TodoController> logger, ITodoService todoService)
     {
         this.logger = logger;
+        this._todoService = todoService;
     }
 
-    [HttpPost("TodoList")]
-    public async Task<IActionResult> CreateTodoList([FromBody] CreateTodoDto requestDto)
+    [HttpPost("create-todolist")]
+    public async Task<IActionResult> Post(
+            [FromBody] CreateTodoDto todo)
     {
-        // Implement the logic to create a todo list
-        logger.LogInformation("Creating a new todo list with name: {Name}", requestDto.name);
-        return Ok(new { message = "Todo list created successfully" });
+        logger.LogInformation("Executing POST method inside a TodoController at {0}", DateTime.Now);
+        var result = await _todoService.CreateTodoAsync(todo);
+        return result.IsSuccess ? Created() : BadRequest(result.Error);
     }
 
 }
