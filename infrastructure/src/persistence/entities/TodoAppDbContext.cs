@@ -48,6 +48,8 @@ public class TodoAppDbContext : DbContext
             .HasForeignKey(x => x.TagId)
             .OnDelete(DeleteBehavior.Cascade);
     }
+
+    
     public DbSet<User> Users { get; set; }
     public DbSet<TodoList> TodoLists { get; set; }
     public DbSet<TodoItem> TodoItems { get; set; }

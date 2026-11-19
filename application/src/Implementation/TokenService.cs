@@ -18,35 +18,36 @@ public class TokenService(
         //   IConfiguration configuration
         ) : ITokenService
 {
-     public async Task<Result<TokenResponseDtoOne>> GetTokenAsync(TokenRequestDto requestDto)
-        {
-            var userDomain =
-                await userRepository.GetByEmailAsync(requestDto.userName);
+    public async Task<Result<TokenResponseDtoOne>> GetTokenAsync(TokenRequestDto requestDto)
+    {
+        var userDomain =
+            await userRepository.GetByEmailAsync(requestDto.userName);
 
-            if (userDomain == null)
-                return Result.Failure<TokenResponseDtoOne>(
-                    Error.Unauthorized("Auth.InvalidEmail", ErrorConstants.InvalidEmail));
+        if (userDomain == null)
+            return Result.Failure<TokenResponseDtoOne>(
+                Error.Unauthorized("Auth.InvalidEmail", ErrorConstants.InvalidEmail));
 
-            if (!passwordHasher.VerifyPassword(requestDto.password, userDomain.PasswordHash))
-                return Result.Failure<TokenResponseDtoOne>(
-                    Error.Unauthorized("Auth.InvalidPassword", ErrorConstants.InvalidPassword));
+        if (!passwordHasher.VerifyPassword(requestDto.password, userDomain.PasswordHash))
+            return Result.Failure<TokenResponseDtoOne>(
+                Error.Unauthorized("Auth.InvalidPassword", ErrorConstants.InvalidPassword));
 
-            // Generate refresh token
-            // var refreshToken = 
-            //     await GenerateAndStoreRefreshTokenAsync(userDomain.Id, clientIp: null);
+        // Generate refresh token
+        // var refreshToken = 
+        //     await GenerateAndStoreRefreshTokenAsync(userDomain.Id, clientIp: null);
 
-            // Generate access token
-            string accessToken = GenerateAccessToken(userDomain);
-            // string accessToken = GenerateAccessToken(userDomain, refreshToken.refreshTokenId);
-            // int accessTokenExpiryMinutes = GetAccessTokenExpiryMinutes();
+        // Generate access token
+        string accessToken = GenerateAccessToken(userDomain);
+        // string accessToken = GenerateAccessToken(userDomain, refreshToken.refreshTokenId);
+        // int accessTokenExpiryMinutes = GetAccessTokenExpiryMinutes();
 
-            return Result.Success(new TokenResponseDtoOne(accessToken));
-            // return Result.Success(new TokenResponseDto(accessToken, refreshToken.refreshToken));
-        }
+        return Result.Success(new TokenResponseDtoOne(accessToken));
+        // return Result.Success(new TokenResponseDto(accessToken, refreshToken.refreshToken));
+    }
 
 
-         private string GenerateAccessToken(UserDomain userResponse)
-        {
+    private string GenerateAccessToken(UserDomain userResponse)
+    {
+        
             string secretKey = configuration["Jwt:Secret"]!;
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -63,7 +64,8 @@ public class TokenService(
                         new Claim("UserId", userResponse.Id.ToString())
                         // new Claim("sid",sessionId.ToString())
                     ]),
-                    Expires = DateTime.UtcNow.AddMinutes(60),
+                    Expires = DateTime.UtcNow.AddMinutes(configuration["Jwt:AccessTokenExpirationMinutes"] != null ? int.Parse(configuration["Jwt:AccessTokenExpirationMinutes"]) : 60
+                        ),
                     SigningCredentials = credentials,
                     Issuer = configuration["Jwt:Issuer"],
                     Audience = configuration["Jwt:Audience"]
@@ -73,7 +75,16 @@ public class TokenService(
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return token;
-        }
+        // try
+        // {
+
+        // }
+        // catch (System.Exception ex)
+        // {
+        //     var errorMessage = $"Error generating access token: {ex.Message}";
+        //     return  errorMessage;
+        // }
+    }
 
 
 
