@@ -19,6 +19,7 @@ public static class DependencyInjection
 
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITodoRepository, TodoRepository>();
 
         return services;
     }
@@ -28,6 +29,7 @@ public static class DependencyInjection
     {
         
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITodoService, TodoService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

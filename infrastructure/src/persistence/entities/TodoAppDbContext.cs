@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore;
 public class TodoAppDbContext : DbContext
 {
     private readonly ICurrentUserService currentUserService;
+    private readonly TodoAppDbContext dbContext;
 
-    public TodoAppDbContext(DbContextOptions<TodoAppDbContext> options, ICurrentUserService currentUserService) : base(options)
+    public TodoAppDbContext(DbContextOptions<TodoAppDbContext> options, ICurrentUserService currentUserService,TodoAppDbContext dbContext) : base(options)
     {
         this.currentUserService = currentUserService;
+        this.dbContext = dbContext;
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
@@ -34,6 +36,7 @@ public class TodoAppDbContext : DbContext
             
             if (entry.State == EntityState.Added)
             {
+                var username=dbContext.Users.FirstOrDefault(x => x.Id == currentUserService.GetCurrentUserId())?.Username;
                entry.Entity.CreatedBy = currentUserService.GetCurrentUserId()??"SystemID";
                 entry.Entity.CreatedAt = DateTime.UtcNow;
             }

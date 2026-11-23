@@ -74,3 +74,9 @@ Important
 
 
 **Let's do Steps 1 and 2 first.** Send me the terminal output after `git fetch origin`, and we'll confirm everything is fixed.
+
+
+<!-- =====================================for a broken remote main -->
+
+rm -f .git/ORIG_HEAD
+git pull origin main
