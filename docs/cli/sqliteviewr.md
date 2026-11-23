@@ -1,0 +1,1 @@
+SQLite Viewer by Florian Klampfer (qwtel) 
