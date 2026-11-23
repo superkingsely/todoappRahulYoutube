@@ -5,12 +5,10 @@ using Microsoft.EntityFrameworkCore;
 public class TodoAppDbContext : DbContext
 {
     private readonly ICurrentUserService currentUserService;
-    private readonly TodoAppDbContext dbContext;
 
-    public TodoAppDbContext(DbContextOptions<TodoAppDbContext> options, ICurrentUserService currentUserService,TodoAppDbContext dbContext) : base(options)
+    public TodoAppDbContext(DbContextOptions<TodoAppDbContext> options, ICurrentUserService currentUserService) : base(options)
     {
         this.currentUserService = currentUserService;
-        this.dbContext = dbContext;
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
@@ -36,13 +34,18 @@ public class TodoAppDbContext : DbContext
             
             if (entry.State == EntityState.Added)
             {
-                var username=dbContext.Users.FirstOrDefault(x => x.Id == currentUserService.GetCurrentUserId())?.Username;
-               entry.Entity.CreatedBy = currentUserService.GetCurrentUserId()??"SystemID";
+                var userId = currentUserService.GetCurrentUserId();
+                var user=Users.FirstOrDefault(x => x.Id==Guid.Parse(userId));
+                var userName = user?.Email ?? "System";
+               entry.Entity.CreatedBy = userName;
                 entry.Entity.CreatedAt = DateTime.UtcNow;
             }
             else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.UpdatedBy = currentUserService.GetCurrentUserId()??"SystemID";
+                var userId = currentUserService.GetCurrentUserId();
+                var user = Users.FirstOrDefault(x => x.Id == Guid.Parse(userId));
+                var userName = user?.Email ?? "System";
+                entry.Entity.UpdatedBy = userName;
                 entry.Entity.UpdatedAt = DateTime.UtcNow;
             }
         }
