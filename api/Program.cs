@@ -1,5 +1,6 @@
 
 
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Scalar.AspNetCore;
 
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 builder.Services.AddInfrastructure(builder.Configuration)
                 .AddApplication();
 
@@ -45,7 +47,33 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<UserContextMiddleware>();
+ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions()
+            {
+                ResponseWriter = async (context, report) =>
+                {
+                    context.Response.ContentType = "application/json";
+                    var response
+                     = new
+                     {
+                         status = report.Status.ToString(),
+                         totalDuration = report.TotalDuration.TotalMilliseconds,
+                         checks = report.Entries.Select(entry => new
+                         {
+                             name = entry.Key,
+                             status = entry.Value.Status.ToString(),
+                             duration = entry.Value.Duration.TotalMilliseconds,
+                             description = entry.Value.Description,
+                         })
+                     };
 
+
+                    await context.Response.WriteAsync(
+                        JsonSerializer.Serialize(response, new JsonSerializerOptions
+                        {
+                            WriteIndented = true
+                        }));
+                }
+            });
 app.MapControllers();
 app.Run();
 

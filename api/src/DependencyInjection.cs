@@ -14,7 +14,7 @@ public static class DependencyInjection
         {
             options.UseSqlite(connectionString);
         });
-
+        services.AddHealthChecks().AddDbContextCheck<TodoAppDbContext>();
         services.AddAutoMapper(typeof(TodoMappingExtension).Assembly); // register automapper only at infra layer
 
 
